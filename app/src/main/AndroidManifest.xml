@@ -16,11 +16,24 @@
     android:label="@string/app_name"
     android:roundIcon="@mipmap/ic_launcher_madcamp_round"
     android:supportsRtl="true"
-    android:theme="@style/AppTheme">
+    android:theme="@style/AppTheme"
+    android:usesCleartextTraffic="true">
+    <activity android:name=".ui.main.Tab1.EditContactActivity">
+    </activity>
+    <activity android:name=".ui.main.Tab1.ContactDetailActivity">
+    </activity>
+    <activity android:name=".ui.main.Tab1.AddContactActivity">
+    </activity>
+
     <meta-data
       android:name="com.naver.maps.map.CLIENT_ID"
       android:value="in8c216ypj"/>
-
+    <!--
+meta-data
+      android:name="com.facebook.sdk.ApplicationId"
+      android:value="@string/facebook_app_id"
+      /
+        -->
     <activity
       android:label="@string/app_name"
       android:name=".MainActivity"
@@ -31,8 +44,8 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
     </activity>
-    <activity android:name=".ui.main.Tab3.TimeTableActivity"></activity>
-    <activity android:name=".ui.main.Tab2.ImageActivity"></activity>
+    <activity android:name=".ui.main.Tab3.TimeTableActivity"/>
+    <activity android:name=".ui.main.Tab2.ImageActivity"/>
   </application>
 
 </manifest>

@@ -13,11 +13,13 @@ import android.provider.ContactsContract;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.task2.R;
@@ -26,135 +28,144 @@ import java.util.ArrayList;
 
 
 public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHolder> {
-
-  private ArrayList<ContactList> items = new ArrayList<>();
-  private Context mContext;
-  EditText callNum;
-  String num;
-
-
-  public ContactAdapter(Context context) {
-    this.mContext = context;
-  }
-
-  @NonNull
-  @Override
-  public ContactAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int i) {
-
-    View itemView = LayoutInflater.from(parent.getContext())
-        .inflate(R.layout.item_contact, parent, false);
-
-    callNum = (EditText) itemView.findViewById(R.id.call);
-    Button button1 = (Button) itemView.findViewById(R.id.callBtn);
-    button1.setOnClickListener(new Button.OnClickListener() {
-      @Override
-      public void onClick(View view) {
-        num = callNum.getText().toString();
+    
+    private ArrayList<ContactList> items = new ArrayList<>();
+    private Context mContext;
+    private OnItemClickListener mListner = null;
+    EditText callNum;
+    
+    public interface OnItemClickListener {
+        void onItemClick(View v, int position);
+    }
+    
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.mListner = listener;
+    }
+    
+    
+    public ContactAdapter(Context context) {
+        this.mContext = context;
+    }
+    
+    @NonNull
+    @Override
+    public ContactAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, final int i) {
+        
+        View itemView = LayoutInflater.from(parent.getContext())
+            .inflate(R.layout.item_contact, parent, false);
+        return new ViewHolder(itemView);
+    }
+    
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
+        
+        ContactList item = items.get(position);
+        //Bitmap bm = loadContactPhoto(mContext.getContentResolver(), item.getThumnailld());
+        
+        viewHolder.Name.setText(item.getName());
+        viewHolder.Phone_number.setText(item.getPhone_number());
+        viewHolder.Address.setText(item.getAddress());
+        viewHolder.CallNum.setText(item.getPhone_number());
+//        if (mContext.getContentResolver() != null && bm != null) {
+//            viewHolder.Picture.setImageBitmap(bm);
+//        }
+    }
+    
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+    
+    public void addItem(int position, ContactList contactList) { items.add(position, contactList); }
+    
+    
+    public Bitmap loadContactPhoto(ContentResolver cr, long photo_id) {
+        
+        byte[] photoBytes = null;
+        Uri photoUri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photo_id);
+        Cursor c = cr
+            .query(photoUri, new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null,
+                null);
+        
         try {
-          Intent callIntent = new Intent(Intent.ACTION_CALL);
-          callIntent.setData(Uri.parse("tel:" + num));
-          mContext.startActivity(callIntent);
-        } catch (ActivityNotFoundException e) {
+            if (c.moveToFirst()) {
+                photoBytes = c.getBlob(0);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            c.close();
         }
-      }
-    });
-    return new ViewHolder(itemView);
-  }
-
-  @Override
-  public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
-
-    ContactList item = items.get(position);
-    Bitmap bm = loadContactPhoto(mContext.getContentResolver(), item.getPersonId(),
-        item.getThumnailld());
-
-    viewHolder.Name.setText(item.getName());
-    viewHolder.Phone_number.setText(item.getPhone_number());
-    viewHolder.Address.setText(item.getAddress());
-    viewHolder.CallNum.setText(item.getPhone_number());
-    if (mContext.getContentResolver() != null && bm != null) {
-      viewHolder.Picture.setImageBitmap(bm);
+        
+        if (photoBytes != null) {
+            return resizingBitmap(BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length));
+        }
+        
+        return null;
     }
-  }
-
-  @Override
-  public int getItemCount() {
-    return items.size();
-  }
-
-
-  public Bitmap loadContactPhoto(ContentResolver cr, long id, long photo_id) {
-
-    byte[] photoBytes = null;
-    Uri photoUri = ContentUris.withAppendedId(ContactsContract.Data.CONTENT_URI, photo_id);
-    Cursor c = cr
-        .query(photoUri, new String[]{ContactsContract.CommonDataKinds.Photo.PHOTO}, null, null,
-            null);
-
-    try {
-      if (c.moveToFirst()) {
-        photoBytes = c.getBlob(0);
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    } finally {
-      c.close();
+    
+    public Bitmap resizingBitmap(Bitmap oBitmap) {
+        if (oBitmap == null) {
+            return null;
+        }
+        
+        float width = oBitmap.getWidth();
+        float height = oBitmap.getHeight();
+        float resizing_size = 120;
+        
+        Bitmap rBitmap = null;
+        if (width > resizing_size) {
+            float mWidth = (float) (width / 100);
+            float fScale = (float) (resizing_size / mWidth);
+            width *= (fScale / 100);
+            height *= (fScale / 100);
+            
+        } else if (height > resizing_size) {
+            float mHeight = (float) (height / 100);
+            float fScale = (float) (resizing_size / mHeight);
+            
+            width *= (fScale / 100);
+            height *= (fScale / 100);
+        }
+        
+        rBitmap = Bitmap.createScaledBitmap(oBitmap, (int) width, (int) height, true);
+        return rBitmap;
     }
-
-    if (photoBytes != null) {
-      return resizingBitmap(BitmapFactory.decodeByteArray(photoBytes, 0, photoBytes.length));
+    
+    public void setItems(ArrayList<ContactList> items) {
+        this.items = items;
     }
-
-    return null;
-  }
-
-  public Bitmap resizingBitmap(Bitmap oBitmap) {
-    if (oBitmap == null) {
-      return null;
+    
+    class ViewHolder extends RecyclerView.ViewHolder {
+        
+        ImageView Picture;
+        TextView Name, Phone_number, Address;
+        EditText CallNum;
+        Button callBtn;
+        CardView cardView;
+        
+        public ViewHolder(View itemView) {
+            super(itemView);
+            
+            Picture = itemView.findViewById(R.id.list_item_picture);
+            
+            Name = itemView.findViewById(R.id.list_item_name);
+            Phone_number = itemView.findViewById(R.id.list_item_number);
+            Address = itemView.findViewById(R.id.list_item_address);
+            CallNum = itemView.findViewById(R.id.call);
+            callBtn = itemView.findViewById(R.id.callBtn);
+            cardView = itemView.findViewById(R.id.cv_item_movie_parent);
+            cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int pos = getAdapterPosition();
+                    if(pos != RecyclerView.NO_POSITION) {
+                        if (mListner != null) {
+                            mListner.onItemClick(view, pos);
+                        }
+                    }
+                }
+            });
+        }
     }
-
-    float width = oBitmap.getWidth();
-    float height = oBitmap.getHeight();
-    float resizing_size = 120;
-
-    Bitmap rBitmap = null;
-    if (width > resizing_size) {
-      float mWidth = (float) (width / 100);
-      float fScale = (float) (resizing_size / mWidth);
-      width *= (fScale / 100);
-      height *= (fScale / 100);
-
-    } else if (height > resizing_size) {
-      float mHeight = (float) (height / 100);
-      float fScale = (float) (resizing_size / mHeight);
-
-      width *= (fScale / 100);
-      height *= (fScale / 100);
-    }
-
-    rBitmap = Bitmap.createScaledBitmap(oBitmap, (int) width, (int) height, true);
-    return rBitmap;
-  }
-
-  public void setItems(ArrayList<ContactList> items) {
-    this.items = items;
-  }
-
-  class ViewHolder extends RecyclerView.ViewHolder {
-
-    ImageView Picture;
-    TextView Name, Phone_number, Address;
-    EditText CallNum;
-
-    ViewHolder(View itemView) {
-      super(itemView);
-
-      Picture = itemView.findViewById(R.id.list_item_picture);
-
-      Name = itemView.findViewById(R.id.list_item_name);
-      Phone_number = itemView.findViewById(R.id.list_item_number);
-      Address = itemView.findViewById(R.id.list_item_address);
-      CallNum = itemView.findViewById(R.id.call);
-    }
-  }
 }

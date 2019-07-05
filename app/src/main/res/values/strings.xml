@@ -9,4 +9,5 @@
   <string name="todo">TODO</string>
   <string name="btitle">Btitle</string>
   <string name="fragment1">Fragment1</string>
+  <string name="facebook_app_id">Facebook App ID</string>
 </resources>

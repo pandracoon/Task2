@@ -8,7 +8,7 @@
         android:id="@+id/cv_item_movie_parent"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:cardBackgroundColor="#000000"
+        app:cardBackgroundColor="@android:color/darker_gray"
         app:cardCornerRadius="4dp"
         app:cardElevation="0dp"
         app:cardUseCompatPadding="true"
@@ -19,8 +19,8 @@
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:ems="0"
-            android:text="callNum"
-            android:focusableInTouchMode="false"/>
+            android:focusableInTouchMode="false"
+            android:text="callNum" />
 
         <Button
             android:id="@+id/callBtn"

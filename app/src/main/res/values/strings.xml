@@ -9,4 +9,6 @@
   <string name="todo">TODO</string>
   <string name="btitle">Btitle</string>
   <string name="fragment1">Fragment1</string>
+  <string name="facebook_app_id">494841714594746</string>
+  <string name="fb_login_protocol_scheme">fb494841714594746</string>
 </resources>

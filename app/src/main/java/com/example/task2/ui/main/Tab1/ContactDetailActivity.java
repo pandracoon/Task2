@@ -28,9 +28,11 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
     private String initialName, initialPhone, initialEmail = "", contact_id, name, phone, email;
     private long initialPhoto, photo;
     private boolean info_changed = false;
+    private int position;
     
     private static final int REQUEST_PHONE_CALL = 1;
     private static final int EDIT_DATA_REQUEST = 3;
+    private static final int RESULT_DELETED = 404;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,7 +106,15 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
             }
             
             case R.id.deleteBtn: {
-                // TODO : Implement deleting a contact entry
+                Intent intent = new Intent();
+                intent.putExtra("contact_id", contact_id);
+                intent.putExtra("name", name);
+                intent.putExtra("phone", phone);
+                intent.putExtra("email", email);
+                intent.putExtra("photo", photo);
+                intent.putExtra("position", position);
+                setResult(RESULT_DELETED, intent);
+                finish();
             }
         }
     }
@@ -144,6 +154,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
         initialEmail = getIntent().getStringExtra("email");
         initialPhoto = getIntent().getLongExtra("phone", 0);
         contact_id = getIntent().getStringExtra("contact_id");
+        position = getIntent().getIntExtra("position", 0);
     
         name = initialName;
         phone = initialPhone;

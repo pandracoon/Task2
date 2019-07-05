@@ -46,6 +46,8 @@ public class Fragment1 extends Fragment {
     static final int REQUEST_PERMISSION_KEY = 1;
     private static final int ADD_DATA_REQUEST = 2;
     private static final int EDIT_DATA_REQUEST = 3;
+    private static final int RESULT_DELETED = 404;
+    
     RecyclerView recyclerView;
     ContactAdapter adapter = new ContactAdapter(getContextOfApplication());
     CompositeDisposable compositeDisposable = new CompositeDisposable();
@@ -142,7 +144,6 @@ public class Fragment1 extends Fragment {
         switch (requestCode) {
             case ADD_DATA_REQUEST: {
                 if(resultCode == RESULT_OK) {
-                    Log.d("ADD_DATA_REQUEST", "You are here!");
                     String name, phone, email;
                     
                     name = intent.getStringExtra("name");
@@ -161,7 +162,7 @@ public class Fragment1 extends Fragment {
                 if(resultCode == RESULT_OK) {
                     String initialName, initialPhone, initialEmail, name, phone, email, contact_id;
                     long initialPhoto, photo;
-                    Log.d("EDIT_DATA_REQUEST", "You are here!");
+                    int position;
                     
                     initialName = intent.getStringExtra("initialName");
                     initialPhone = intent.getStringExtra("initialPhone");
@@ -172,12 +173,32 @@ public class Fragment1 extends Fragment {
                     email = intent.getStringExtra("email");
                     photo = intent.getLongExtra("photo", 0);
                     contact_id = intent.getStringExtra("contact_id");
+                    position = intent.getIntExtra("position", 0);
                     
                     deleteContact(contact_id, initialName, initialPhone, initialEmail);
                     addContact("", name, phone, email, String.valueOf(photo));
-                    // TODO : Add a contact entry without getting the whole thing from the server
-                    refreshContacts();
-                    adapter.notifyDataSetChanged();
+                    adapter.removeItem(position);
+                    adapter.notifyItemRemoved(position);
+                    position = adapter.getItemCount();
+                    adapter.addItem(position, new ContactList(name, phone, email, Long.getLong("0"), ""));
+                    adapter.notifyItemInserted(position);
+                    return;
+                }
+                else if(resultCode == RESULT_DELETED) {
+                    String contact_id, name, phone, email;
+                    long photo;
+                    int position;
+                    
+                    contact_id = intent.getStringExtra("contact_id");
+                    name = intent.getStringExtra("name");
+                    phone = intent.getStringExtra("phone");
+                    email = intent.getStringExtra("email");
+                    photo = intent.getLongExtra("photo", 0);
+                    position = intent.getIntExtra("position", 0);
+                    
+                    deleteContact(contact_id, name, phone, email);
+                    adapter.removeItem(position);
+                    adapter.notifyItemRemoved(position);
                     return;
                 }
             }
@@ -279,6 +300,7 @@ public class Fragment1 extends Fragment {
                 intent.putExtra("phone", contacts.get(position).getPhone_number());
                 intent.putExtra("email", contacts.get(position).getAddress());
                 intent.putExtra("photo", contacts.get(position).getThumnailld());
+                intent.putExtra("position", position);
                 intent.putExtra("contact_id", contacts.get(position).getContactid());
                 startActivityForResult(intent, EDIT_DATA_REQUEST);
             }

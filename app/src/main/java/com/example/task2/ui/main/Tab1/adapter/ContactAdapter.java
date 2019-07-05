@@ -78,6 +78,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     
     public void addItem(int position, ContactList contactList) { items.add(position, contactList); }
     
+    public void removeItem(int position) { items.remove(position); }
     
     public Bitmap loadContactPhoto(ContentResolver cr, long photo_id) {
         

@@ -184,6 +184,7 @@ public class Fragment1 extends Fragment {
                     adapter.notifyItemInserted(position);
                     return;
                 }
+                
                 else if(resultCode == RESULT_DELETED) {
                     String contact_id, name, phone, email;
                     long photo;

@@ -74,6 +74,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
                     intent.putExtra("phone", phone);
                     intent.putExtra("email", email);
                     intent.putExtra("photo", photo);
+                    intent.putExtra("position", position);
                     setResult(RESULT_OK, intent);
                 }
                 else {
@@ -91,6 +92,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
                     return;
                 }
                 startActivity(intent);
+                return;
             }
             
             case R.id.editBtn: {
@@ -103,6 +105,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
                 }
                 intent.putExtra("photo", photo);
                 startActivityForResult(intent, EDIT_DATA_REQUEST);
+                return;
             }
             
             case R.id.deleteBtn: {
@@ -115,6 +118,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
                 intent.putExtra("position", position);
                 setResult(RESULT_DELETED, intent);
                 finish();
+                return;
             }
         }
     }

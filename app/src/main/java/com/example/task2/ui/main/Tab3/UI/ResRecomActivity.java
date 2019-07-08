@@ -79,7 +79,6 @@ public class ResRecomActivity extends Activity {
         optionStateList = getOptionStateList();
         String recommendText = RestaurantManager
             .recommendRestaurant(restaurantList, optionList, optionStateList);
-        Log.e("뭐나옴?",recommendText);
 
         textView=(TextView)findViewById(R.id.recommendTextView);
         textView.setText(recommendText);

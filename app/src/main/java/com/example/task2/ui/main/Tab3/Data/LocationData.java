@@ -1,4 +1,4 @@
-package com.example.task2.ui.main.Tab3;
+package com.example.task2.ui.main.Tab3.Data;
 
 import com.naver.maps.geometry.LatLng;
 import java.time.DayOfWeek;

@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import com.example.task2.R;
 import com.example.task2.ui.main.Tab1.Fragment1;
 import com.example.task2.ui.main.Tab2.Fragment2;
-import com.example.task2.ui.main.Tab3.Fragment3;
+import com.example.task2.ui.main.Tab3.UI.Fragment3;
 
 /**
  * A [FragmentPagerAdapter] that returns a fragment corresponding to

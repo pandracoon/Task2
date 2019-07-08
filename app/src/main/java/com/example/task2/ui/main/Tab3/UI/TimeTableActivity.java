@@ -1,4 +1,4 @@
-package com.example.task2.ui.main.Tab3;
+package com.example.task2.ui.main.Tab3.UI;
 
 import android.app.Activity;
 import android.os.Bundle;

@@ -1,18 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
   android:orientation="vertical"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
-
   <GridView
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
+    android:id="@+id/gridViewImages"
+    android:layout_width="0dp"
+    android:layout_height="match_parent"
     android:layout_margin="5dp"
     android:columnWidth="100dp"
     android:horizontalSpacing="5dp"
-    android:verticalSpacing="5dp"
     android:numColumns="auto_fit"
-    android:id="@+id/gridViewImages">
+    android:verticalSpacing="5dp"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintHorizontal_bias="1.0"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent"
+    app:layout_constraintVertical_bias="1.0">
 
   </GridView>
-</LinearLayout>
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/fabGalleryAlbum"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginRight="16dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:visibility="invisible"
+    app:layout_constraintBottom_toTopOf="@id/fabGalleryMenu"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:srcCompat="@drawable/gallery"/>
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/fabGalleryRefresh"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:layout_marginEnd="12dp"
+    android:layout_marginRight="12dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:scaleType="centerInside"
+    android:visibility="invisible"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toStartOf="@id/fabGalleryMenu"
+    app:srcCompat="@drawable/refresh"/>
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/fabGalleryCamera"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="12dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginRight="16dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:visibility="invisible"
+    app:layout_constraintBottom_toTopOf="@id/fabGalleryAlbum"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:srcCompat="@drawable/camera"/>
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/fabGalleryMenu"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="16dp"
+    android:layout_marginEnd="16dp"
+    android:layout_marginRight="16dp"
+    android:clickable="true"
+    android:focusable="true"
+    app:backgroundTint="@android:color/holo_orange_light"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:srcCompat="@drawable/menu"/>
+</androidx.constraintlayout.widget.ConstraintLayout>

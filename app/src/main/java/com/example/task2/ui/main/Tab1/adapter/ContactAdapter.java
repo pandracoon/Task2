@@ -32,7 +32,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     private ArrayList<ContactList> items = new ArrayList<>();
     private Context mContext;
     private OnItemClickListener mListner = null;
-    EditText callNum;
     
     public interface OnItemClickListener {
         void onItemClick(View v, int position);
@@ -63,9 +62,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         //Bitmap bm = loadContactPhoto(mContext.getContentResolver(), item.getThumnailld());
         
         viewHolder.Name.setText(item.getName());
-        viewHolder.Phone_number.setText(item.getPhone_number());
-        viewHolder.Address.setText(item.getAddress());
-        viewHolder.CallNum.setText(item.getPhone_number());
+//        viewHolder.Phone_number.setText(item.getPhone_number());
+//        viewHolder.Address.setText(item.getAddress());
 //        if (mContext.getContentResolver() != null && bm != null) {
 //            viewHolder.Picture.setImageBitmap(bm);
 //        }
@@ -137,11 +135,14 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
         this.items = items;
     }
     
+    public ArrayList<ContactList> getItems() {
+        return items;
+    }
+    
     class ViewHolder extends RecyclerView.ViewHolder {
         
         ImageView Picture;
         TextView Name, Phone_number, Address;
-        EditText CallNum;
         Button callBtn;
         CardView cardView;
         
@@ -151,10 +152,20 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             Picture = itemView.findViewById(R.id.list_item_picture);
             
             Name = itemView.findViewById(R.id.list_item_name);
-            Phone_number = itemView.findViewById(R.id.list_item_number);
-            Address = itemView.findViewById(R.id.list_item_address);
-            CallNum = itemView.findViewById(R.id.call);
+//            Phone_number = itemView.findViewById(R.id.list_item_number);
+//            Address = itemView.findViewById(R.id.list_item_address);
             callBtn = itemView.findViewById(R.id.callBtn);
+            callBtn.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int pos = getAdapterPosition();
+                    if(pos != RecyclerView.NO_POSITION) {
+                        Uri uri = Uri.parse("tel:" + items.get(pos).getPhone_number());
+                        Intent intent = new Intent(Intent.ACTION_CALL, uri);
+                        mContext.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                    }
+                }
+            });
             cardView = itemView.findViewById(R.id.cv_item_movie_parent);
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override

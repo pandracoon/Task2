@@ -84,7 +84,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
                 return;
             }
             
-            case R.id.callBtn: {
+            case R.id.callDetailBtn: {
                 Uri uri = Uri.parse("tel:" + phone);
                 Intent intent = new Intent(Intent.ACTION_CALL, uri);
                 if (checkSelfPermission(Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {

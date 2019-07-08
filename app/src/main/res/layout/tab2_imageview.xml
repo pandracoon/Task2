@@ -1,12 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  android:orientation="vertical"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
   android:layout_width="match_parent"
-  android:layout_height="match_parent">
+  android:layout_height="match_parent"
+  tools:context=".ui.main.Tab2.ImageActivity">
 
   <ImageView
     android:id="@+id/imageView"
     android:layout_width="match_parent"
-    android:layout_height="match_parent" />
+    android:layout_height="match_parent"
+    android:layout_below="@+id/linearLayout"
+    android:layout_alignParentEnd="true"
+    android:layout_alignParentRight="true"
+    android:layout_alignParentBottom="true"
+    android:layout_marginTop="-40dp"
+    android:layout_marginEnd="0dp"
+    android:layout_marginRight="0dp"
+    android:layout_marginBottom="0dp"
+    app:srcCompat="@drawable/profile" />
 
-</LinearLayout>
+  <LinearLayout
+    android:id="@+id/linearLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <ImageButton
+      android:id="@+id/backButton"
+      android:layout_width="40dp"
+      android:layout_height="40dp"
+      android:background="?android:attr/panelBackground"
+      android:padding="7dp"
+      android:scaleType="centerInside"
+      android:src="@drawable/back_arrow" />
+  </LinearLayout>
+</RelativeLayout>

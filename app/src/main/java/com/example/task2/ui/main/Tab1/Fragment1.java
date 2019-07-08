@@ -1,6 +1,5 @@
 package com.example.task2.ui.main.Tab1;
 
-import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
 import static com.example.task2.MainActivity.getContextOfApplication;
 
@@ -15,16 +14,13 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import com.example.task2.MainActivity;
 import com.example.task2.R;
 import com.example.task2.Retrofit.IMyService;
 import com.example.task2.Retrofit.RetrofitClient;
@@ -40,18 +36,24 @@ import java.util.ArrayList;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import retrofit2.Retrofit;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
-public class Fragment1 extends Fragment {
+public class Fragment1 extends Fragment implements View.OnClickListener{
     
     static final int REQUEST_PERMISSION_KEY = 1;
     private static final int ADD_DATA_REQUEST = 2;
     private static final int EDIT_DATA_REQUEST = 3;
     private static final int RESULT_DELETED = 404;
     
-    RecyclerView recyclerView;
-    ContactAdapter adapter = new ContactAdapter(getContextOfApplication());
-    CompositeDisposable compositeDisposable = new CompositeDisposable();
-    IMyService iMyService;
+    private RecyclerView recyclerView;
+    private ContactAdapter adapter = new ContactAdapter(getContextOfApplication());
+    private FloatingActionButton fabContactsAdd, fabContactsSync, fabContactsRefresh, fabContactsMenu;
+    private CompositeDisposable compositeDisposable = new CompositeDisposable();
+    private IMyService iMyService;
+    
+    private Animation fab_open, fab_close;
+    private Boolean isFabOpen = false;
     
     @Override
     public void onStop() {
@@ -72,17 +74,18 @@ public class Fragment1 extends Fragment {
         Retrofit retrofitClient = RetrofitClient.getInstance();
         iMyService = retrofitClient.create(IMyService.class);
         
-        FloatingActionButton fab = view.findViewById(R.id.fab);
+        fab_open = AnimationUtils.loadAnimation(getContextOfApplication(), R.anim.fab_open);
+        fab_close = AnimationUtils.loadAnimation(getContextOfApplication(), R.anim.fab_close);
         
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                Intent intent = new Intent(Intent.ACTION_INSERT,
-//                ContactsContract.Contacts.CONTENT_URI);
-                Intent intent = new Intent(getActivity(), AddContactActivity.class);
-                startActivityForResult(intent, ADD_DATA_REQUEST);
-            }
-        });
+        fabContactsAdd = view.findViewById(R.id.fabContactsAdd);
+        fabContactsSync = view.findViewById(R.id.fabContactsSync);
+        fabContactsRefresh = view.findViewById(R.id.fabContactsRefresh);
+        fabContactsMenu = view.findViewById(R.id.fabContactsMenu);
+        
+        fabContactsAdd.setOnClickListener(this);
+        fabContactsRefresh.setOnClickListener(this);
+        fabContactsSync.setOnClickListener(this);
+        fabContactsMenu.setOnClickListener(this);
         
         String[] PERMISSION_1 = {Manifest.permission.WRITE_CONTACTS,
             Manifest.permission.READ_CONTACTS,
@@ -91,6 +94,20 @@ public class Fragment1 extends Fragment {
         if (!hasPermissions(getContextOfApplication(), PERMISSION_1)) {
             ActivityCompat.requestPermissions(getActivity(), PERMISSION_1, REQUEST_PERMISSION_KEY);
         }
+    
+        adapter.setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(View v, int position) {
+                Intent intent = new Intent(getActivity(), ContactDetailActivity.class);
+                intent.putExtra("name", adapter.getItems().get(position).getName());
+                intent.putExtra("phone", adapter.getItems().get(position).getPhone_number());
+                intent.putExtra("email", adapter.getItems().get(position).getAddress());
+                intent.putExtra("photo", adapter.getItems().get(position).getThumnailld());
+                intent.putExtra("position", position);
+                intent.putExtra("contact_id", adapter.getItems().get(position).getContactid());
+                startActivityForResult(intent, EDIT_DATA_REQUEST);
+            }
+        });
         
         recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this.getContext()));
@@ -112,8 +129,50 @@ public class Fragment1 extends Fragment {
         return true;
     }
     
+    @Override
+    public void onClick(View view) {
+        switch(view.getId()) {
+            case R.id.fabContactsAdd: {
+                Intent intent = new Intent(getActivity(), AddContactActivity.class);
+                startActivityForResult(intent, ADD_DATA_REQUEST);
+                return;
+            }
+            
+            case R.id.fabContactsRefresh: {
+                refreshContacts();
+                return;
+            }
+            
+            case R.id.fabContactsSync: {
+                syncContacts();
+                refreshContacts();
+                return;
+            }
+            
+            case R.id.fabContactsMenu: {
+                if(isFabOpen) {
+                    fabContactsAdd.startAnimation(fab_close);
+                    fabContactsSync.startAnimation(fab_close);
+                    fabContactsRefresh.startAnimation(fab_close);
+                    fabContactsAdd.setClickable(false);
+                    fabContactsSync.setClickable(false);
+                    fabContactsRefresh.setClickable(false);
+                    isFabOpen = false;
+                }
+                else {
+                    fabContactsAdd.startAnimation(fab_open);
+                    fabContactsSync.startAnimation(fab_open);
+                    fabContactsRefresh.startAnimation(fab_open);
+                    fabContactsAdd.setClickable(true);
+                    fabContactsSync.setClickable(true);
+                    fabContactsRefresh.setClickable(true);
+                    isFabOpen = true;
+                }
+            }
+        }
+    }
+    
     class LoadContactsAsync extends AsyncTask<Void, Void, ArrayList<ContactList>> {
-        
         ProgressDialog pd;
         
         @Override
@@ -134,7 +193,6 @@ public class Fragment1 extends Fragment {
             super.onPostExecute(contacts);
             
             pd.cancel();
-            
             recyclerView.setAdapter(adapter);
         }
     }
@@ -250,12 +308,13 @@ public class Fragment1 extends Fragment {
                         long photo = Long.parseLong(jObject.getString("photo"));
                         contacts.add(new ContactList(name, phone_number, email, photo, contact_id));
                     }
+                    adapter.setItems(contacts);
+                    adapter.notifyDataSetChanged();
                 }
             }));
     }
     
-    // Phone에 저장된 연락처를 server에 upload하고 server에 저장된 연락처를 불러와 adapter에 적용시킴
-    private ArrayList<ContactList> refreshContacts() {
+    private void syncContacts() {
         final ArrayList<ContactList> contacts = new ArrayList<>();
         Uri uri_phone = ContactsContract.CommonDataKinds.Phone.CONTENT_URI;
         String[] projection = new String[]{
@@ -275,7 +334,7 @@ public class Fragment1 extends Fragment {
             String contactName = c_phone.getString(1);
             String phNumber = c_phone.getString(0);
             String contact_id = c_phone.getString(4);
-        
+    
             Uri uri_email = ContactsContract.CommonDataKinds.Email.CONTENT_URI;
             Cursor ce = getActivity().getContentResolver()
                 .query(uri_email, null,
@@ -287,26 +346,14 @@ public class Fragment1 extends Fragment {
                     .getString(ce.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA));
                 ce.close();
             }
-//            contacts.add(
-//                new ContactList(contactName, phNumber, email, photo_id, contact_id));
             addContact(contact_id, contactName, phNumber, email, String.valueOf(photo_id));
         }
+    }
+    
+    // server에 저장된 연락처를 불러와 adapter에 적용시킴
+    private ArrayList<ContactList> refreshContacts() {
+        ArrayList<ContactList> contacts = new ArrayList<>();
         downloadContact(contacts);
-        adapter.setItems(contacts);
-        adapter.setOnItemClickListener(new OnItemClickListener() {
-            @Override
-            public void onItemClick(View v, int position) {
-                Intent intent = new Intent(getActivity(), ContactDetailActivity.class);
-                intent.putExtra("name", contacts.get(position).getName());
-                intent.putExtra("phone", contacts.get(position).getPhone_number());
-                intent.putExtra("email", contacts.get(position).getAddress());
-                intent.putExtra("photo", contacts.get(position).getThumnailld());
-                intent.putExtra("position", position);
-                intent.putExtra("contact_id", contacts.get(position).getContactid());
-                startActivityForResult(intent, EDIT_DATA_REQUEST);
-            }
-        });
-        c_phone.close();
         return contacts;
     }
 }

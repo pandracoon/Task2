@@ -1,9 +1,13 @@
 package com.example.task2.Retrofit;
 
 import io.reactivex.Observable;
+import okhttp3.MultipartBody;
+import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
+import retrofit2.http.Multipart;
 import retrofit2.http.POST;
+import retrofit2.http.Part;
 
 public interface IMyService {
 
@@ -30,4 +34,20 @@ public interface IMyService {
         @Field("name") String name,
         @Field("phone_number") String phone_number,
         @Field("email") String email);
+    
+    @Multipart
+    @POST("/gallery/upload")
+    Call<Response> uploadImage(
+        @Part MultipartBody.Part image);
+    
+    @POST("uploadG")
+    @FormUrlEncoded
+    Observable<String> uploadPictureInfo(
+        @Field("user_id") String user_id,
+        @Field("file_name") String file_name);
+    
+    @POST("downloadG")
+    @FormUrlEncoded
+    Observable<String> downloadPicture(
+        @Field("user_id") String user_id);
 }

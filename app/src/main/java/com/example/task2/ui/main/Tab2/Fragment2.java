@@ -222,6 +222,7 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
                 if(response.isSuccessful()) {
                     Response responseBody = response.body();
                     mImageUrl = URL + responseBody.getPath();
+                    Log.d("uploadImage", "여기ㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣ");
                     addPicture("1", mFileName);
                 }
             }

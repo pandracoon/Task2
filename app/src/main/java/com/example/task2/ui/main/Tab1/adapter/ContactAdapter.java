@@ -59,14 +59,16 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     public void onBindViewHolder(@NonNull ViewHolder viewHolder, int position) {
         
         ContactList item = items.get(position);
-        //Bitmap bm = loadContactPhoto(mContext.getContentResolver(), item.getThumnailld());
-        
+        if(item.getThumnailld() != null && item.getThumnailld() != 0){
+            Bitmap bm = loadContactPhoto(mContext.getContentResolver(), item.getThumnailld());
+            if (mContext.getContentResolver() != null && bm != null) {
+                items.get(position).setPhoto(bm);
+                viewHolder.Picture.setImageBitmap(bm);
+            }
+        }
         viewHolder.Name.setText(item.getName());
 //        viewHolder.Phone_number.setText(item.getPhone_number());
 //        viewHolder.Address.setText(item.getAddress());
-//        if (mContext.getContentResolver() != null && bm != null) {
-//            viewHolder.Picture.setImageBitmap(bm);
-//        }
     }
     
     @Override
@@ -142,7 +144,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
     class ViewHolder extends RecyclerView.ViewHolder {
         
         ImageView Picture;
-        TextView Name, Phone_number, Address;
+        TextView Name;
         Button callBtn;
         CardView cardView;
         
@@ -152,8 +154,6 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ViewHold
             Picture = itemView.findViewById(R.id.list_item_picture);
             
             Name = itemView.findViewById(R.id.list_item_name);
-//            Phone_number = itemView.findViewById(R.id.list_item_number);
-//            Address = itemView.findViewById(R.id.list_item_address);
             callBtn = itemView.findViewById(R.id.callBtn);
             callBtn.setOnClickListener(new View.OnClickListener() {
                 @Override

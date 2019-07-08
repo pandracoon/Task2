@@ -1,5 +1,7 @@
 package com.example.task2.ui.main.Tab1.model;
 
+import android.graphics.Bitmap;
+
 public class ContactList {
     
     private String name;
@@ -8,6 +10,8 @@ public class ContactList {
     //private Long personId;
     private Long thumnailld;
     private String contactid;
+    boolean hasPhoto = false;
+    Bitmap bitmap = null;
     
     public ContactList(String name, String phone_number, String address, //Long personId,
         Long thumnailld, String contactid) {
@@ -44,4 +48,13 @@ public class ContactList {
     public String getContactid() {
         return contactid;
     }
+    
+    public void setPhoto(Bitmap bitmap) {
+        this.bitmap = bitmap;
+        this.hasPhoto = true;
+    }
+    
+    public boolean hasPhoto() { return this.hasPhoto; }
+    
+    public Bitmap getPhoto() { return bitmap; }
 }

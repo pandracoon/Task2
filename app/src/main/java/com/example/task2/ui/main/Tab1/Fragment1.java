@@ -103,6 +103,9 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
                 intent.putExtra("phone", adapter.getItems().get(position).getPhone_number());
                 intent.putExtra("email", adapter.getItems().get(position).getAddress());
                 intent.putExtra("photo", adapter.getItems().get(position).getThumnailld());
+                intent.putExtra("hasPhoto", adapter.getItems().get(position).hasPhoto());
+                if(adapter.getItems().get(position).hasPhoto())
+                    intent.putExtra("photo", adapter.getItems().get(position).getPhoto());
                 intent.putExtra("position", position);
                 intent.putExtra("contact_id", adapter.getItems().get(position).getContactid());
                 startActivityForResult(intent, EDIT_DATA_REQUEST);

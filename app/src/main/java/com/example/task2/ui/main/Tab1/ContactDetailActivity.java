@@ -27,7 +27,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
     
     private String initialName, initialPhone, initialEmail = "", contact_id, name, phone, email;
     private long initialPhoto, photo;
-    private boolean info_changed = false;
+    private boolean info_changed = false, hasPhoto;
     private int position;
     
     private static final int REQUEST_PHONE_CALL = 1;
@@ -159,6 +159,7 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
         initialPhoto = getIntent().getLongExtra("phone", 0);
         contact_id = getIntent().getStringExtra("contact_id");
         position = getIntent().getIntExtra("position", 0);
+        hasPhoto = getIntent().getBooleanExtra("hasPhoto", false);
     
         name = initialName;
         phone = initialPhone;
@@ -177,17 +178,18 @@ public class ContactDetailActivity extends AppCompatActivity implements View.OnC
         }
     
         ImageView photoImage = findViewById(R.id.photoImageView);
-        Glide.with(this)
-            .asBitmap()
-            .load(R.drawable.profile)
-            .into(photoImage);
-//        if (getIntent().hasExtra("photo")) {
-//            long photo = getIntent().getLongExtra("photo", 0);
-//            ImageView photoImage = findViewById(R.id.imageView);
-//            Glide.with(this)
-//                .asBitmap()
-//                .load(photo)
-//                .into(photoImage);
-//        }
+        if(hasPhoto) {
+            Bitmap bitmap = getIntent().getParcelableExtra("photo");
+            Glide.with(this)
+                .asBitmap()
+                .load(bitmap)
+                .into(photoImage);
+        }
+        else {
+            Glide.with(this)
+                .asBitmap()
+                .load(R.drawable.profile)
+                .into(photoImage);
+        }
     }
 }

@@ -24,8 +24,8 @@ public class LoginLoadingActivity extends Activity {
       @Override
       public void run() {
         Intent intent = new Intent(LoginLoadingActivity.this.getApplicationContext(), MainActivity.class);
-        String email = getIntent().getStringExtra("email");
-        intent.putExtra("email", email);
+        String global_id = getIntent().getStringExtra("global_id");
+        intent.putExtra("global_id", global_id);
         startActivity(intent);
         LoginLoadingActivity.this.finish();
       }

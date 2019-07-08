@@ -2,6 +2,7 @@ package com.example.task2.ui.main.Tab2;
 
 import static android.app.Activity.RESULT_OK;
 import static com.example.task2.MainActivity.getContextOfApplication;
+import static com.example.task2.MainActivity.getGlobalId;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -80,6 +81,8 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
     private static final int INTENT_REQUEST_CAMERA = 101;
     public static final String URL = "http://143.248.36.213:3000";
     
+    private String global_id;
+    
     private FloatingActionButton fabGalleryAlbum, fabGalleryRefresh, fabGalleryCamera, fabGalleryMenu;
     private Boolean isFabOpen = false;
     private Animation fab_open, fab_close;
@@ -98,6 +101,8 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_fragment2, container, false);
+    
+        global_id = getGlobalId();
         
         okHttpClient = new OkHttpClient.Builder()
             .connectTimeout(1, TimeUnit.MINUTES)
@@ -123,7 +128,7 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
     
         gridViewImages = (GridView) view.findViewById(R.id.gridViewImages);
         imageGridAdapter = new ImageGridAdapter(this.getContext(), mBitmaps);
-        downloadPicture("1");
+        downloadPicture(global_id);
         gridViewImages.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
@@ -223,7 +228,7 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
                     Response responseBody = response.body();
                     mImageUrl = URL + responseBody.getPath();
                     Log.d("uploadImage", "여기ㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣㅣ");
-                    addPicture("1", mFileName);
+                    addPicture(global_id, mFileName);
                 }
             }
     
@@ -238,6 +243,7 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.fabGalleryAlbum: {
+                anim();
                 Intent intent = new Intent(Intent.ACTION_PICK);
                 intent.setType(Media.CONTENT_TYPE);
                 startActivityForResult(intent, INTENT_REQUEST_ALBUM);
@@ -245,12 +251,14 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
             }
             
             case R.id.fabGalleryRefresh: {
+                anim();
                 mBitmaps.clear();
-                downloadPicture("1");
+                downloadPicture(global_id);
                 return;
             }
             
             case R.id.fabGalleryCamera: {
+                anim();
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 if(intent.resolveActivity(getContext().getPackageManager()) != null) {
                     File photoFile = null;
@@ -269,26 +277,30 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
             }
     
             case R.id.fabGalleryMenu: {
-                if(isFabOpen) {
-                    fabGalleryAlbum.startAnimation(fab_close);
-                    fabGalleryCamera.startAnimation(fab_close);
-                    fabGalleryRefresh.startAnimation(fab_close);
-                    fabGalleryAlbum.setClickable(false);
-                    fabGalleryCamera.setClickable(false);
-                    fabGalleryRefresh.setClickable(false);
-                    isFabOpen = false;
-                }
-                else {
-                    fabGalleryAlbum.startAnimation(fab_open);
-                    fabGalleryCamera.startAnimation(fab_open);
-                    fabGalleryRefresh.startAnimation(fab_open);
-                    fabGalleryAlbum.setClickable(true);
-                    fabGalleryCamera.setClickable(true);
-                    fabGalleryRefresh.setClickable(true);
-                    isFabOpen = true;
-                }
+                anim();
                 return;
             }
+        }
+    }
+    
+    public void anim() {
+        if(isFabOpen) {
+            fabGalleryAlbum.startAnimation(fab_close);
+            fabGalleryCamera.startAnimation(fab_close);
+            fabGalleryRefresh.startAnimation(fab_close);
+            fabGalleryAlbum.setClickable(false);
+            fabGalleryCamera.setClickable(false);
+            fabGalleryRefresh.setClickable(false);
+            isFabOpen = false;
+        }
+        else {
+            fabGalleryAlbum.startAnimation(fab_open);
+            fabGalleryCamera.startAnimation(fab_open);
+            fabGalleryRefresh.startAnimation(fab_open);
+            fabGalleryAlbum.setClickable(true);
+            fabGalleryCamera.setClickable(true);
+            fabGalleryRefresh.setClickable(true);
+            isFabOpen = true;
         }
     }
     
@@ -302,7 +314,7 @@ public class Fragment2 extends Fragment implements View.OnClickListener {
                 public void accept(String response) throws Exception {
                     //Toast.makeText(getActivity(), ""+response, Toast.LENGTH_SHORT).show();
                     mBitmaps.clear();
-                    downloadPicture("1");
+                    downloadPicture(global_id);
                 }
             }));
     }

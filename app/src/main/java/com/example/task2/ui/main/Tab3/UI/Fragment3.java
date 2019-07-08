@@ -2,9 +2,11 @@ package com.example.task2.ui.main.Tab3.UI;
 
 import static com.example.task2.MainActivity.getContextOfApplication;
 
+import android.annotation.TargetApi;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.PointF;
+import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,14 +18,18 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import com.example.task2.R;
+import com.example.task2.Retrofit.IMyService;
+import com.example.task2.Retrofit.RetrofitClient;
 import com.example.task2.ui.main.Tab3.Data.LocationData;
 import com.example.task2.ui.main.Tab3.Data.OptionList;
 import com.example.task2.ui.main.Tab3.Data.Restaurant;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.naver.maps.geometry.LatLng;
+import com.naver.maps.geometry.LatLngBounds;
 import com.naver.maps.map.CameraPosition;
 import com.naver.maps.map.MapView;
 import com.naver.maps.map.NaverMap;
@@ -34,7 +40,22 @@ import com.naver.maps.map.overlay.Marker;
 import com.naver.maps.map.overlay.Overlay;
 import com.naver.maps.map.overlay.OverlayImage;
 import com.naver.maps.map.overlay.PathOverlay;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+import java.util.Base64;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import retrofit2.Retrofit;
 
 ;
 
@@ -56,6 +77,9 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
   private Animation fab_open, fab_close;
   private Boolean isFabOpen = false;
   private FloatingActionButton fab, fab1, fab2, fab3;
+  
+  private CompositeDisposable compositeDisposable = new CompositeDisposable();
+  private IMyService iMyService;
 
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -66,46 +90,17 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
       Bundle savedInstanceState) {
 
     View view = inflater.inflate(R.layout.layout_fragment3, container, false);
+  
+    Retrofit retrofitClient = RetrofitClient.getInstance();
+    iMyService = retrofitClient.create(IMyService.class);
 
     mapView = (MapView) view.findViewById(R.id.map_view);
     mapView.getMapAsync(this);
 
-//    searchText = (EditText) view.findViewById(R.id.searchText);
-//    searchbutton = (ImageButton) view.findViewById(R.id.imageButton);
-//    searchbutton.setOnClickListener(new OnClickListener() {
-//      @Override
-//      public void onClick(View view) {
-//        AsyncTask.execute(new Runnable() {
-//          @Override
-//          public void run() {
-//            try {
-//              URL searchURL = new URL("https://naveropenapi.apigw.ntruss.com/map-place/v1/search");
-//              HttpsURLConnection searchConnection = (HttpsURLConnection) searchURL.openConnection();
-//              searchConnection.setRequestProperty("X-NCP-APIGW-API-KEY-ID","in8c216ypj");
-//              searchConnection.setRequestProperty("X-NCP-APIGW-API-KEY","oTdZPV7kqDhK75QFpHsNrroxRh5CPxJcwKIFoedb");
-//
-//              if(searchConnection.getResponseCode() == 200){
-//                //Success
-//                InputStream responseBody = searchConnection.getInputStream();
-//                InputStreamReader responseBodyReader = new InputStreamReader(responseBody, "UTF-8");
-//                JsonReader jsonReader = new JsonReader(responseBodyReader);
-//              }
-//              else{
-//
-//              }
-//            } catch (MalformedURLException e) {
-//              e.printStackTrace();
-//            } catch (IOException e) {
-//              e.printStackTrace();
-//            }
-//
-//          }
-//        });
-//      }
-//    });
-
     restaurantList = new ArrayList<Restaurant>(); //TODO DB에서 데이터를 불러와서 Restaurant 객체들을 채워야 할 곳.
     optionList = new OptionList();
+  
+    downloadData("1");
 
     fab_open = AnimationUtils.loadAnimation(getContextOfApplication(), R.anim.fab_open);
     fab_close = AnimationUtils.loadAnimation(getContextOfApplication(), R.anim.fab_close);
@@ -122,8 +117,6 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
         switch (id) {
           case R.id.timetableBtn:
             anim();
-            Toast.makeText(getContextOfApplication(), "Floating Action Button", Toast.LENGTH_SHORT)
-                .show();
             break;
           case R.id.addFab:
             anim();
@@ -177,13 +170,14 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
     fab2.setOnClickListener(fabOnClickListener);
     fab3.setOnClickListener(fabOnClickListener);
 
-//    fab.setOnClickListener(new View.OnClickListener() {
-//      @Override
-//      public void onClick(View view) {
-//        Intent intent = new Intent(getContextOfApplication(), TimeTableActivity.class);
-//        startActivity(intent);
-//      }
-//    });
+    FloatingActionButton timeTableButton = (FloatingActionButton) view.findViewById(R.id.realTimeTableButton);
+    timeTableButton.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View view) {
+        Intent intent = new Intent(getContextOfApplication(), TimeTableActivity.class);
+        startActivity(intent);
+      }
+    });
 
     return view;
   }
@@ -200,9 +194,9 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
 
     naverMap.setMinZoom(14);
 
-//    LatLng NELimitLocation = new LatLng(36.3763389, 127.3707596);
-//    LatLng SWLimitLocation = new LatLng(36.3631224, 127.354996);
-//    naverMap.setExtent(new LatLngBounds(SWLimitLocation, NELimitLocation));
+    LatLng NELimitLocation = new LatLng(36.3763389, 127.3707596);
+    LatLng SWLimitLocation = new LatLng(36.3631224, 127.354996);
+    naverMap.setExtent(new LatLngBounds(SWLimitLocation, NELimitLocation));
 
     final LocationData locationData = new LocationData();
     locationData.setData();
@@ -297,6 +291,7 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
 
   @Override
   public void onStop() {
+    compositeDisposable.clear();
     super.onStop();
     mapView.onStop();
   }
@@ -313,6 +308,7 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
     mapView.onLowMemory();
   }
 
+  @RequiresApi(api = VERSION_CODES.KITKAT)
   @Override
   public void onActivityResult(int requestCode, int resultCode, Intent intent) { //TODO 정보 업데이트 시켜줘야
     super.onActivityResult(requestCode, resultCode, intent);
@@ -321,15 +317,102 @@ public class Fragment3 extends Fragment implements OnMapReadyCallback {
       case ADD_REQUEST:
         restaurantList = (ArrayList<Restaurant>) intent.getSerializableExtra("restaurantList");
         optionList = (OptionList) intent.getSerializableExtra("optionList");
+        uploadData("1", serialize(restaurantList), serialize(optionList));
         break;
       case LIST_REQUEST:
         restaurantList = (ArrayList<Restaurant>) intent.getSerializableExtra("restaurantList");
         optionList = (OptionList) intent.getSerializableExtra("optionList");
+        uploadData("1", serialize(restaurantList), serialize(optionList));
         break;
       case RECOM_REQUEST:
         restaurantList = (ArrayList<Restaurant>) intent.getSerializableExtra("restaurantList");
         optionList = (OptionList) intent.getSerializableExtra("optionList");
+        uploadData("1", serialize(restaurantList), serialize(optionList));
     }
+  }
+  
+  @TargetApi(VERSION_CODES.O)
+  @RequiresApi(api = VERSION_CODES.KITKAT)
+  public String serialize(Object object) {
+    byte[] serializedObject;
+    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+      try (ObjectOutputStream oos = new ObjectOutputStream(baos)) {
+        oos.writeObject(object);
+        serializedObject = baos.toByteArray();
+        return Base64.getEncoder().encodeToString(serializedObject);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
+  @RequiresApi(api = VERSION_CODES.O)
+  public Object deserialize(String string) {
+    byte[] serializedObject = Base64.getDecoder().decode(string);
+    try(ByteArrayInputStream bais = new ByteArrayInputStream(serializedObject)) {
+      try(ObjectInputStream ois = new ObjectInputStream(bais)) {
+        Object object = ois.readObject();
+        return object;
+      } catch (ClassNotFoundException e) {
+        e.printStackTrace();
+        return null;
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+      return null;
+    }
+  }
+  
+  private void uploadData(String user_id, String restaurant_list, String option_list) {
+    compositeDisposable.add(iMyService.uploadRestaurant(user_id, restaurant_list, option_list)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<String>() {
+          @Override
+          public void accept(String response) throws Exception {
+            //
+          }
+        }));
+  }
+  
+  private void downloadData(String user_id) {
+    compositeDisposable.add(iMyService.downloadRestaurant(user_id)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<String>() {
+          @RequiresApi(api = VERSION_CODES.O)
+          @Override
+          public void accept(String response) throws Exception {
+            if(isJSONValid(response)) {
+              JSONArray jArray = new JSONArray(response);
+              for (int i = 0; i < jArray.length(); i++) {
+                JSONObject jObject = jArray.getJSONObject(i);
+                String restaurantString = jObject.getString("restaurant_list");
+                String optionString = jObject.getString("option_list");
+                if(deserialize(restaurantString) != null && deserialize(optionString) != null) {
+                  restaurantList = (ArrayList<Restaurant>) deserialize(restaurantString);
+                  optionList = (OptionList) deserialize(optionString);
+                }
+              }
+            }
+          }
+        }));
+  }
+  
+  public boolean isJSONValid(String test) {
+    try {
+      new JSONObject(test);
+    } catch (JSONException ex) {
+      // edited, to include @Arthur's comment
+      // e.g. in case JSONArray is valid as well...
+      try {
+        new JSONArray(test);
+      } catch (JSONException ex1) {
+        return false;
+      }
+    }
+    return true;
   }
 }
 

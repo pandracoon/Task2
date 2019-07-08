@@ -2,6 +2,7 @@ package com.example.task2.ui.main.Tab1;
 
 import static android.app.Activity.RESULT_OK;
 import static com.example.task2.MainActivity.getContextOfApplication;
+import static com.example.task2.MainActivity.getGlobalId;
 
 import android.Manifest;
 import android.app.ProgressDialog;
@@ -34,6 +35,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import java.util.ArrayList;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import retrofit2.Retrofit;
 import android.view.animation.Animation;
@@ -45,6 +47,8 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     private static final int ADD_DATA_REQUEST = 2;
     private static final int EDIT_DATA_REQUEST = 3;
     private static final int RESULT_DELETED = 404;
+    
+    private String global_id;
     
     private RecyclerView recyclerView;
     private ContactAdapter adapter = new ContactAdapter(getContextOfApplication());
@@ -70,6 +74,8 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
         Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.layout_fragment1, container, false);
+        
+        global_id = getGlobalId();
         
         Retrofit retrofitClient = RetrofitClient.getInstance();
         iMyService = retrofitClient.create(IMyService.class);
@@ -136,42 +142,50 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.fabContactsAdd: {
+                anim();
                 Intent intent = new Intent(getActivity(), AddContactActivity.class);
                 startActivityForResult(intent, ADD_DATA_REQUEST);
                 return;
             }
             
             case R.id.fabContactsRefresh: {
+                anim();
                 refreshContacts();
                 return;
             }
             
             case R.id.fabContactsSync: {
+                anim();
                 syncContacts();
                 refreshContacts();
                 return;
             }
             
             case R.id.fabContactsMenu: {
-                if(isFabOpen) {
-                    fabContactsAdd.startAnimation(fab_close);
-                    fabContactsSync.startAnimation(fab_close);
-                    fabContactsRefresh.startAnimation(fab_close);
-                    fabContactsAdd.setClickable(false);
-                    fabContactsSync.setClickable(false);
-                    fabContactsRefresh.setClickable(false);
-                    isFabOpen = false;
-                }
-                else {
-                    fabContactsAdd.startAnimation(fab_open);
-                    fabContactsSync.startAnimation(fab_open);
-                    fabContactsRefresh.startAnimation(fab_open);
-                    fabContactsAdd.setClickable(true);
-                    fabContactsSync.setClickable(true);
-                    fabContactsRefresh.setClickable(true);
-                    isFabOpen = true;
-                }
+                anim();
+                return;
             }
+        }
+    }
+    
+    public void anim() {
+        if(isFabOpen) {
+            fabContactsAdd.startAnimation(fab_close);
+            fabContactsSync.startAnimation(fab_close);
+            fabContactsRefresh.startAnimation(fab_close);
+            fabContactsAdd.setClickable(false);
+            fabContactsSync.setClickable(false);
+            fabContactsRefresh.setClickable(false);
+            isFabOpen = false;
+        }
+        else {
+            fabContactsAdd.startAnimation(fab_open);
+            fabContactsSync.startAnimation(fab_open);
+            fabContactsRefresh.startAnimation(fab_open);
+            fabContactsAdd.setClickable(true);
+            fabContactsSync.setClickable(true);
+            fabContactsRefresh.setClickable(true);
+            isFabOpen = true;
         }
     }
     
@@ -269,7 +283,7 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     
     // 서버로 Contact Entry를 추가하는 요청을 보냄
     private void addContact(String contact_id, String name, String phone, String email, String photo) {
-        compositeDisposable.add(iMyService.uploadContact("1", contact_id, name, phone, email, photo)
+        compositeDisposable.add(iMyService.uploadContact(global_id, contact_id, name, phone, email, photo)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Consumer<String>() {
@@ -282,7 +296,7 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     
     // 서버로 지정한 Contact Entry를 삭제하는 요청을 보냄
     private void deleteContact(String contact_id, String name, String phone, String email) {
-        compositeDisposable.add(iMyService.deleteContact("1", contact_id, name, phone, email)
+        compositeDisposable.add(iMyService.deleteContact(global_id, contact_id, name, phone, email)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Consumer<String>() {
@@ -295,21 +309,23 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
     
     // 서버로 해당하는 user_id를 가진 모든 Contact Entry를 보내라는 요청을 보냄
     private void downloadContact(final ArrayList<ContactList> contacts) {
-        compositeDisposable.add(iMyService.downloadContact("1")
+        compositeDisposable.add(iMyService.downloadContact(global_id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(new Consumer<String>() {
                 @Override
                 public void accept(String response) throws Exception {
-                    JSONArray jArray = new JSONArray(response);
-                    for(int i=0; i<jArray.length(); i++) {
-                        JSONObject jObject = jArray.getJSONObject(i);
-                        String contact_id = jObject.getString("contact_id");
-                        String name = jObject.getString("name");
-                        String phone_number = jObject.getString("phone_number");
-                        String email = jObject.getString("email");
-                        long photo = Long.parseLong(jObject.getString("photo"));
-                        contacts.add(new ContactList(name, phone_number, email, photo, contact_id));
+                    if(isJSONValid(response)) {
+                        JSONArray jArray = new JSONArray(response);
+                        for(int i=0; i<jArray.length(); i++) {
+                            JSONObject jObject = jArray.getJSONObject(i);
+                            String contact_id = jObject.getString("contact_id");
+                            String name = jObject.getString("name");
+                            String phone_number = jObject.getString("phone_number");
+                            String email = jObject.getString("email");
+                            long photo = Long.parseLong(jObject.getString("photo"));
+                            contacts.add(new ContactList(name, phone_number, email, photo, contact_id));
+                        }
                     }
                     adapter.setItems(contacts);
                     adapter.notifyDataSetChanged();
@@ -358,5 +374,20 @@ public class Fragment1 extends Fragment implements View.OnClickListener{
         ArrayList<ContactList> contacts = new ArrayList<>();
         downloadContact(contacts);
         return contacts;
+    }
+    
+    public boolean isJSONValid(String test) {
+        try {
+            new JSONObject(test);
+        } catch (JSONException ex) {
+            // edited, to include @Arthur's comment
+            // e.g. in case JSONArray is valid as well...
+            try {
+                new JSONArray(test);
+            } catch (JSONException ex1) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -47,7 +47,7 @@ public class ResInfoActivity extends Activity {
     restaurant = (Restaurant) getIntent().getSerializableExtra("restaurant");
 
     titleTextView = (TextView) findViewById(R.id.titleTextView);
-    titleTextView.setText("  " + restaurant.getName());
+    titleTextView.setText("    " + restaurant.getName());
 
     locationTextView = (TextView) findViewById(R.id.locationTextView);
     locationTextView.setText(restaurant.getLocation());

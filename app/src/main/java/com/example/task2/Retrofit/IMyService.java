@@ -50,4 +50,16 @@ public interface IMyService {
     @FormUrlEncoded
     Observable<String> downloadPicture(
         @Field("user_id") String user_id);
+    
+    @POST("uploadR")
+    @FormUrlEncoded
+    Observable<String> uploadRestaurant(
+        @Field("user_id") String user_id,
+        @Field("restaurant_list") String restaurant_list,
+        @Field("option_list") String option_list);
+    
+    @POST("downloadR")
+    @FormUrlEncoded
+    Observable<String> downloadRestaurant(
+        @Field("user_id") String user_id);
 }

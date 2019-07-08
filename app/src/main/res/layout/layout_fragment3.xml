@@ -15,24 +15,13 @@
     app:layout_constraintStart_toStartOf="parent"/>
 
   <com.google.android.material.floatingactionbutton.FloatingActionButton
-    android:id="@+id/timetableBtn"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_margin="@dimen/fab_margin"
-    android:layout_marginBottom="8dp"
-    android:layout_marginEnd="8dp"
-    android:layout_gravity="bottom|end"
-    app:srcCompat="@drawable/plus"
-    app:backgroundTint="?attr/colorPrimary"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"/>
-  <com.google.android.material.floatingactionbutton.FloatingActionButton
     android:id="@+id/addFab"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_margin="@dimen/fab_margin"
     android:layout_marginBottom="8dp"
     android:layout_marginEnd="8dp"
+    android:src="@drawable/edit"
     android:visibility="invisible"
     app:elevation="6dp"
     app:layout_constraintBottom_toTopOf="@+id/listFab"
@@ -45,6 +34,7 @@
     android:layout_margin="@dimen/fab_margin"
     android:layout_marginBottom="8dp"
     android:layout_marginEnd="8dp"
+    android:src="@drawable/padnote"
     android:visibility="invisible"
     app:elevation="6dp"
     app:layout_constraintBottom_toTopOf="@+id/recommendFab"
@@ -57,11 +47,25 @@
     android:layout_margin="@dimen/fab_margin"
     android:layout_marginBottom="8dp"
     android:layout_marginEnd="8dp"
+    android:src="@drawable/like"
     android:visibility="invisible"
     app:elevation="6dp"
     app:layout_constraintBottom_toTopOf="@+id/timetableBtn"
     app:layout_constraintEnd_toEndOf="parent"
     app:pressedTranslationZ="12dp"/>
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/timetableBtn"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/fab_margin"
+    android:layout_marginBottom="16dp"
+    android:layout_marginEnd="336dp"
+    android:layout_marginRight="336dp"
+    android:layout_gravity="bottom|end"
+    app:backgroundTint="@android:color/holo_orange_light"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:srcCompat="@drawable/menu"/>
   <!--<EditText-->
   <!--android:id="@+id/searchText"-->
   <!--android:layout_width="348dp"-->
@@ -80,6 +84,20 @@
   <!--app:layout_constraintEnd_toEndOf="parent"-->
   <!--app:layout_constraintTop_toTopOf="parent"-->
   <!--app:srcCompat="@android:drawable/ic_menu_search"/>-->
+
+  <com.google.android.material.floatingactionbutton.FloatingActionButton
+    android:id="@+id/realTimeTableButton"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/fab_margin"
+    android:layout_marginBottom="8dp"
+    android:layout_marginStart="8dp"
+    android:layout_marginLeft="8dp"
+    android:layout_gravity="bottom|end"
+    android:src="@drawable/calender"
+    app:backgroundTint="?attr/colorPrimary"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintStart_toStartOf="parent"/>
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

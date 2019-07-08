@@ -51,9 +51,9 @@ public class LoginCallback implements FacebookCallback<LoginResult> {
             Log.e("result", object.toString());
 
             try {
-              String email = object.getString("name");
+              String global_id = object.getString("id");
               Intent intent = new Intent(context, LoginLoadingActivity.class);
-              intent.putExtra("email", email);
+              intent.putExtra("global_id", global_id);
               context.startActivity(intent);
               ((Activity)context).finish();
             } catch (Exception e) {
